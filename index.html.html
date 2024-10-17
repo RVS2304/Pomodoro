@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: black;
+            color: white;
+        }
+
+        .sessionText {
+            color: gray;
+            margin: 20px;
+            font-size: small;
+        }
+
+        #timer {
+            font-size: xxx-large;
+            margin: 20px;
+        }
+
+        .session-container {
+            margin-top: 30px;
+        }
+
+        .text {
+            color: rgb(126, 126, 126);
+            padding: 10px;
+            background-color: rgb(30, 30, 30);
+        }
+
+        .sub-session,
+        .sub-break {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+        #session-decrement,
+        #session-increment,
+        #break-decrement,
+        #break-increment {
+            background-color: rgb(5, 181, 245);
+            color: white;
+            width: 300px;
+            margin: 0;
+        }
+
+        .length {
+            width: 100px;
+            padding-right: 385px;
+            padding-left: 385px;
+        }
+
+        #session-length,
+        #break-length {
+            font-size: 20px;
+            width: 100px;
+            background-color: rgb(71, 71, 71);
+        }
+
+        .reset-start {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+        }
+
+        #reset {
+            background-color: rgb(145, 88, 8);
+            padding: 10px 349px;
+        }
+
+        #start-stop {
+            background-color: green;
+            padding: 10px 349px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sessionText">SESSION</div>
+    <div id="timer">25:00</div>
+    <div class="session-container">
+        <div class="text">SESSION LENGTH</div>
+        <div class="sub-session">
+            <button id="session-decrement">&#8722;</button>
+            <span id="session-length" class="length">25</span>
+            <button id="session-increment">+</button>
+        </div>
+    </div>
+    <div class="break-container">
+        <div class="text">BREAK LENGTH</div>
+        <div class="sub-break">
+            <button id="break-decrement">&#8722;</button>
+            <span id="break-length" class="length">5</span>
+            <button id="break-increment">+</button>
+        </div>
+    </div>
+    <div class="reset-start">
+        <button id="reset">Reset</button>
+        <button id="start-stop">Start</button>
+    </div>
+
+
+    <script>
+        let sessionLength = 25;
+        let breakLength = 5;
+        let isSession = true;
+        let isRunning = false;
+        let timer;
+
+        const sessionLengthDisplay = document.getElementById('session-length');
+        const breakLengthDisplay = document.getElementById('break-length');
+        const timerDisplay = document.getElementById('timer');
+        const sessionDecrement = document.getElementById('session-decrement');
+        const sessionIncrement = document.getElementById('session-increment');
+        const breakDecrement = document.getElementById('break-decrement');
+        const breakIncrement = document.getElementById('break-increment');
+        const startStopButton = document.getElementById('start-stop');
+        const resetButton = document.getElementById('reset');
+
+        function updateDisplay() {
+            sessionLengthDisplay.textContent = sessionLength;
+            breakLengthDisplay.textContent = breakLength;
+        }
+
+        function startTimer() {
+            isRunning = true;
+            startStopButton.textContent = 'Stop';
+            timer = setInterval(() => {
+                const time = timerDisplay.textContent.split(':');
+                let minutes = parseInt(time[0]);
+                let seconds = parseInt(time[1]);
+                if (minutes === 0 && seconds === 0) {
+                    if (isSession) {
+                        isSession = false;
+                        timerDisplay.textContent = `${breakLength.toString().padStart(2, '0')}:00`;
+                    } else {
+                        isSession = true;
+                        timerDisplay.textContent = `${sessionLength.toString().padStart(2, '0')}:00`;
+                    }
+                } else {
+                    if (seconds === 0) {
+                        minutes--;
+                        seconds = 59;
+                    } else {
+                        seconds--;
+                    }
+                    timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            isRunning = false;
+            startStopButton.textContent = 'Start';
+            clearInterval(timer);
+        }
+
+        function resetTimer() {
+            stopTimer();
+            startStopButton.style.backgroundColor = 'green';
+            if (isSession) {
+                timerDisplay.textContent = `${sessionLength.toString().padStart(2, '0')}:00`;
+            } else {
+                timerDisplay.textContent = `${breakLength.toString().padStart(2, '0')}:00`;
+            }
+        }
+
+        sessionDecrement.addEventListener('click', () => {
+            if (sessionLength > 1) {
+                sessionLength -= 1;
+                if (!isRunning) {
+                    timerDisplay.textContent = `${sessionLength.toString().padStart(2, '0')}:00`;
+                }
+                updateDisplay();
+            }
+        });
+
+        sessionIncrement.addEventListener('click', () => {
+            sessionLength += 1;
+            if (!isRunning) {
+                timerDisplay.textContent = `${sessionLength.toString().padStart(2, '0')}:00`;
+            }
+            updateDisplay();
+        });
+
+        breakDecrement.addEventListener('click', () => {
+            if (breakLength > 1) {
+                breakLength -= 1;
+                updateDisplay();
+            }
+        });
+
+        breakIncrement.addEventListener('click', () => {
+            breakLength += 1;
+            updateDisplay();
+        });
+
+        startStopButton.addEventListener('click', () => {
+            if (isRunning) {
+                stopTimer();
+                startStopButton.style.backgroundColor = 'green';
+            } else {
+                startTimer();
+                startStopButton.style.backgroundColor = 'red';
+            }
+        });
+
+        resetButton.addEventListener('click', resetTimer);
+
+        updateDisplay();
+    </script>
+</body>
+
+</html>
